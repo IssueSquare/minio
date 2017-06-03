@@ -1721,7 +1721,7 @@ func initAPIHandlerTest(obj ObjectLayer, endpoints []string) (string, http.Handl
 	bucketName := getRandomBucketName()
 
 	// Create bucket.
-	err := obj.MakeBucket(bucketName)
+	err := obj.MakeBucketWithLocation(bucketName, "")
 	if err != nil {
 		// failed to create newbucket, return err.
 		return "", nil, err
@@ -2360,4 +2360,29 @@ func getEndpointsLocalAddr(endpoints EndpointList) string {
 	}
 
 	return globalMinioHost + ":" + globalMinioPort
+}
+
+// fetches a random number between range min-max.
+func getRandomRange(min, max int, seed int64) int {
+	// special value -1 means no explicit seeding.
+	if seed != -1 {
+		rand.Seed(seed)
+	}
+	return rand.Intn(max-min) + min
+}
+
+// Randomizes the order of bytes in the byte array
+// using Knuth Fisher-Yates shuffle algorithm.
+func randomizeBytes(s []byte, seed int64) []byte {
+	// special value -1 means no explicit seeding.
+	if seed != -1 {
+		rand.Seed(seed)
+	}
+	n := len(s)
+	var j int
+	for i := 0; i < n-1; i++ {
+		j = i + rand.Intn(n-i)
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }

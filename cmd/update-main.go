@@ -82,7 +82,7 @@ func getCurrentReleaseTime(minioVersion, minioBinaryPath string) (releaseTime ti
 	}
 
 	// Looks like version is minio non-standard, we use minio binary's ModTime as release time.
-	fi, err := os.Stat(minioBinaryPath)
+	fi, err := osStat(minioBinaryPath)
 	if err != nil {
 		err = fmt.Errorf("Unable to get ModTime of %s. %s", minioBinaryPath, err)
 	} else {
@@ -173,7 +173,6 @@ func downloadReleaseData(releaseChecksumURL string, timeout time.Duration, mode 
 	if resp.StatusCode != http.StatusOK {
 		return data, fmt.Errorf("Error downloading URL %s. Response: %v", releaseChecksumURL, resp.Status)
 	}
-
 	dataBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return data, fmt.Errorf("Error reading response. %s", err)
@@ -185,7 +184,11 @@ func downloadReleaseData(releaseChecksumURL string, timeout time.Duration, mode 
 
 // DownloadReleaseData - downloads release data from minio official server.
 func DownloadReleaseData(timeout time.Duration, mode string) (data string, err error) {
-	return downloadReleaseData(minioReleaseURL+"minio.shasum", timeout, mode)
+	data, err = downloadReleaseData(minioReleaseURL+"minio.shasum", timeout, mode)
+	if err == nil {
+		return data, nil
+	}
+	return downloadReleaseData(minioReleaseURL+"minio.sha256sum", timeout, mode)
 }
 
 func parseReleaseData(data string) (releaseTime time.Time, err error) {
@@ -235,13 +238,16 @@ func getDownloadURL() (downloadURL string) {
 	return minioReleaseURL + "minio"
 }
 
-func getUpdateInfo(timeout time.Duration, mode string) (older time.Duration, downloadURL string, err error) {
-	currentReleaseTime, err := GetCurrentReleaseTime()
+func getUpdateInfo(timeout time.Duration, mode string) (older time.Duration,
+	downloadURL string, err error) {
+
+	var currentReleaseTime, latestReleaseTime time.Time
+	currentReleaseTime, err = GetCurrentReleaseTime()
 	if err != nil {
 		return older, downloadURL, err
 	}
 
-	latestReleaseTime, err := getLatestReleaseTime(timeout, mode)
+	latestReleaseTime, err = getLatestReleaseTime(timeout, mode)
 	if err != nil {
 		return older, downloadURL, err
 	}
@@ -271,8 +277,8 @@ func mainUpdate(ctx *cli.Context) {
 		os.Exit(-1)
 	}
 
-	if older != time.Duration(0) {
-		log.Println(colorizeUpdateMessage(downloadURL, older))
+	if updateMsg := computeUpdateMessage(downloadURL, older); updateMsg != "" {
+		log.Println(updateMsg)
 		os.Exit(1)
 	}
 

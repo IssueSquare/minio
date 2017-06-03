@@ -81,8 +81,8 @@ EXAMPLES:
 func checkUpdate(mode string) {
 	// Its OK to ignore any errors during getUpdateInfo() here.
 	if older, downloadURL, err := getUpdateInfo(1*time.Second, mode); err == nil {
-		if older > time.Duration(0) {
-			log.Println(colorizeUpdateMessage(downloadURL, older))
+		if updateMsg := computeUpdateMessage(downloadURL, older); updateMsg != "" {
+			log.Println(updateMsg)
 		}
 	}
 }
@@ -107,7 +107,7 @@ func initConfig() {
 	// Config file does not exist, we create it fresh and return upon success.
 	if isFile(getConfigFile()) {
 		fatalIf(migrateConfig(), "Config migration failed.")
-		fatalIf(loadConfig(), "Unable to load minio config file")
+		fatalIf(loadConfig(), "Unable to load config version: '%s'.", v18)
 	} else {
 		fatalIf(newConfig(), "Unable to initialize minio config for the first time.")
 		log.Println("Created minio configuration file successfully at " + getConfigDir())

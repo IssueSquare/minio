@@ -17,27 +17,26 @@
 package cmd
 
 // HealBucket - Not relevant.
-func (a AzureObjects) HealBucket(bucket string) error {
+func (l *s3Objects) HealBucket(bucket string) error {
 	return traceError(NotImplemented{})
 }
 
 // ListBucketsHeal - Not relevant.
-func (a AzureObjects) ListBucketsHeal() (buckets []BucketInfo, err error) {
-	return nil, traceError(NotImplemented{})
+func (l *s3Objects) ListBucketsHeal() (buckets []BucketInfo, err error) {
+	return []BucketInfo{}, traceError(NotImplemented{})
 }
 
 // HealObject - Not relevant.
-func (a AzureObjects) HealObject(bucket, object string) (int, int, error) {
+func (l *s3Objects) HealObject(bucket string, object string) (int, int, error) {
 	return 0, 0, traceError(NotImplemented{})
 }
 
 // ListObjectsHeal - Not relevant.
-func (a AzureObjects) ListObjectsHeal(bucket, prefix, marker, delimiter string, maxKeys int) (ListObjectsInfo, error) {
+func (l *s3Objects) ListObjectsHeal(bucket string, prefix string, marker string, delimiter string, maxKeys int) (ListObjectsInfo, error) {
 	return ListObjectsInfo{}, traceError(NotImplemented{})
 }
 
 // ListUploadsHeal - Not relevant.
-func (a AzureObjects) ListUploadsHeal(bucket, prefix, marker, uploadIDMarker,
-	delimiter string, maxUploads int) (ListMultipartsInfo, error) {
+func (l *s3Objects) ListUploadsHeal(bucket string, prefix string, marker string, uploadIDMarker string, delimiter string, maxUploads int) (ListMultipartsInfo, error) {
 	return ListMultipartsInfo{}, traceError(NotImplemented{})
 }
